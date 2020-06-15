@@ -1,0 +1,13 @@
+.square {
+  flex: 1 1 0;
+  display: flex;
+  flex-flow: column nowrap;
+  border: 1px solid black;
+  min-height: 100px;
+  position: relative;
+}
+
+.square-meta {
+  display: flex;
+  justify-content: space-between;
+}

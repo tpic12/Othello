@@ -1,0 +1,15 @@
+.piece {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin: auto auto;
+  margin-top: 5px;
+}
+
+#black {
+  background-color: black;
+}
+
+#white {
+  background-color: white;
+}
