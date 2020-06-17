@@ -231,6 +231,10 @@ class Gameboard extends Component {
     this.setState({ endGame: true });
   };
 
+  handleNewGame = () => {
+    window.location.reload();
+  };
+
   render() {
     let { player, score, endGame } = this.state;
     let squares = this.state.squares.map((square, index) => {
@@ -250,12 +254,13 @@ class Gameboard extends Component {
     }
     return (
       <div className="wrapper">
-        {!endGame && (
+        {endGame && (
           <div className="end-screen">
             <div className="notice">
               <h3>
                 {score.black > score.white ? "Black" : "White"} is the Winner!
               </h3>
+              <button onClick={this.handleNewGame}>Play Again?</button>
             </div>
           </div>
         )}
