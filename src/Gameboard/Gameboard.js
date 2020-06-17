@@ -7,16 +7,22 @@ class Gameboard extends Component {
     super(props);
     this.state = {
       starter: [
-        [27, "white"],
-        [28, "black"],
-        [35, "black"],
-        [36, "white"],
+        [27, "White"],
+        [28, "Black"],
+        [35, "Black"],
+        [36, "White"],
       ],
       pieces: {},
       squares: [],
       rows: [],
       cols: [],
-      player: "white",
+      player: "Black",
+      validMove: false,
+      score: {
+        black: 2,
+        white: 2,
+      },
+      endGame: false,
     };
   }
 
@@ -42,6 +48,7 @@ class Gameboard extends Component {
           row: i,
           col: j,
           piece: null,
+          dir: {},
         };
         squares[key] = square;
         rows[i][j] = square;
@@ -58,33 +65,33 @@ class Gameboard extends Component {
     const { squares, rows, cols } = this.state;
 
     squares.forEach((square) => {
-      square.topLeft =
+      square.dir.topLeft =
         rows[square.row - 1] && cols[square.col - 1]
           ? rows[square.row - 1][square.col - 1]
           : null;
-      square.topRight =
+      square.dir.topRight =
         rows[square.row - 1] && cols[square.col + 1]
           ? rows[square.row - 1][square.col + 1]
           : null;
-      square.bottomLeft =
+      square.dir.bottomLeft =
         rows[square.row + 1] && cols[square.col - 1]
           ? rows[square.row + 1][square.col - 1]
           : null;
-      square.bottomRight =
+      square.dir.bottomRight =
         rows[square.row + 1] && cols[square.col + 1]
           ? rows[square.row + 1][square.col + 1]
           : null;
-      square.top = rows[square.row - 1]
+      square.dir.top = rows[square.row - 1]
         ? rows[square.row - 1][square.col]
         : null;
-      square.bottom = rows[square.row + 1]
+      square.dir.bottom = rows[square.row + 1]
         ? rows[square.row + 1][square.col]
         : null;
-      square.left =
+      square.dir.left =
         rows[square.row] && cols[square.col - 1]
           ? rows[square.row][square.col - 1]
           : null;
-      square.right =
+      square.dir.right =
         rows[square.row] && cols[square.col + 1]
           ? rows[square.row][square.col + 1]
           : null;
@@ -110,17 +117,126 @@ class Gameboard extends Component {
     this.setState({ squares: squares });
   };
 
-  handleTurn = () => {
+  handleTurn = (index) => {
+    const { squares } = this.state;
     let player = this.state.player;
-    player = player === "black" ? "white" : "black";
-    this.setState({ player });
+    //an array of indexes/squares to be changed upon successful recursion/placement
+    let ogLocation = [index];
+    let tempPlacement = [];
+
+    // console.log("index: ", index);
+    for (let [key, value] of Object.entries(squares[index].dir)) {
+      let counter = 0;
+      // console.log("dir: ", key);
+      if (this.validateMove(index, value, key, counter, tempPlacement)) {
+        //add indicies to array to be placed
+        ogLocation = ogLocation.concat(tempPlacement);
+        this.setState({ validMove: true });
+      }
+      tempPlacement = [];
+    }
+    // console.log(ogLocation);
+    // console.log(tempPlacement);
+    // console.log("locations to be placed:", ogLocation);
+    //this places the piece on the board
+    if (ogLocation.length > 1) {
+      for (let i = 0; i < ogLocation.length; i++) {
+        let piece = {
+          location: ogLocation[i],
+          color: player,
+        };
+        if (squares[ogLocation[i]].piece) {
+          Object.assign(squares[ogLocation[i]].piece, piece);
+        } else {
+          squares[ogLocation[i]].piece = piece;
+        }
+
+        // console.log(`placed ${player} on ${ogLocation[i]}`);
+      }
+      this.switchPlayer();
+    }
+  };
+
+  switchPlayer() {
+    let { player } = this.state;
+    player = player === "White" ? "Black" : "White";
+    this.setState({ player: player, validMove: false });
+    this.tallyScore();
+  }
+
+  validateMove(index, value, key, counter, tempPlacement) {
+    let { squares } = this.state;
+    // console.log("counter: ", counter);
+    // console.log("value: ", value);
+    let player = this.state.player;
+    //value === dir children, it is one of the directions to move, object
+    if (value === null || counter > 10) {
+      return false;
+    } else if (!value.piece) {
+      // console.log("nope");
+      return false;
+    }
+    //base case
+    else if (value.piece.color === player && counter !== 0) {
+      // console.log(`success`);
+      return true;
+    }
+    //case: next token is opponent, keep going in the dir
+    else if (value.piece !== null && value.piece.color !== player) {
+      // console.log("nice, onto the next!");
+      tempPlacement.push(value.index);
+      // console.log("current temp:", tempPlacement);
+      return this.validateMove(
+        value.index,
+        squares[value.index].dir[key],
+        key,
+        ++counter,
+        tempPlacement
+      );
+    }
+    //immediate next token is players
+    else if (value.piece.color === player && counter === 0) {
+      // console.log("players color was here");
+      return;
+    }
+  }
+
+  tallyScore = () => {
+    let { squares } = this.state;
+    let blackScore = 0;
+    let whiteScore = 0;
+    let pieces = 0;
+    for (let i = 0; i < squares.length; i++) {
+      if (squares[i].piece !== null) {
+        if (squares[i].piece.color === "White") {
+          whiteScore++;
+        } else if (squares[i].piece.color === "Black") {
+          blackScore++;
+        }
+        pieces++;
+      }
+    }
+    this.setState({
+      score: {
+        black: blackScore,
+        white: whiteScore,
+      },
+    });
+    if (pieces === squares.length) {
+      this.endGame();
+    }
+  };
+
+  endGame = () => {
+    this.setState({ endGame: true });
   };
 
   render() {
+    let { player, score, endGame } = this.state;
     let squares = this.state.squares.map((square, index) => {
       return (
         <Square
-          key={index.index}
+          key={index}
           index={index}
           piece={square.piece}
           handleTurn={this.handleTurn}
@@ -134,6 +250,22 @@ class Gameboard extends Component {
     }
     return (
       <div className="wrapper">
+        {!endGame && (
+          <div className="end-screen">
+            <div className="notice">
+              <h3>
+                {score.black > score.white ? "Black" : "White"} is the Winner!
+              </h3>
+            </div>
+          </div>
+        )}
+        <div className="player-info">
+          <h2>Current Player: {player}</h2>
+          <p>
+            Black:{score.black} | White:{score.white}
+          </p>
+        </div>
+
         <main className="main">
           <div className="board">
             {rows.map((row, index) => {

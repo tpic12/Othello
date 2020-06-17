@@ -6,24 +6,23 @@ class Square extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showPiece: false,
       crd: [this.props.index.row, this.props.index.col],
     };
   }
 
   handleClick = () => {
     let { index, handleTurn } = this.props;
-    console.log("index: ", index);
-    this.setState({ showPiece: true });
-    handleTurn();
+
+    handleTurn(index);
   };
-  //player is the color that changes the piece depending on turn
+
   render() {
     let { index, piece } = this.props;
-    let { showPiece } = this.state;
+    let hasPiece = piece ? "square" : "square empty";
+
     return (
       <div
-        className="square"
+        className={hasPiece}
         key={index.index}
         // id={index.index}
         onClick={this.handleClick}

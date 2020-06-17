@@ -5,6 +5,13 @@
   border: 1px solid black;
   min-height: 100px;
   position: relative;
+  transition: background-color .3s;
+}
+
+.empty:hover {
+  background-color: lightgreen;
+  cursor: pointer;
+
 }
 
 .square-meta {
