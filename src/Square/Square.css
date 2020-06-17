@@ -3,7 +3,9 @@
   display: flex;
   flex-flow: column nowrap;
   border: 1px solid black;
-  min-height: 100px;
+  /* height: 90px; */
+  height: 9.5vw;
+  max-height: 10vh;
   position: relative;
   transition: background-color .3s;
 }
@@ -17,4 +19,14 @@
 .square-meta {
   display: flex;
   justify-content: space-between;
+  margin: auto;
+  height: 80%;
+  width: 80%;
 }
+
+/* @media screen and (max-width: 900px) {
+
+  .square {
+    height: 5vh;
+  }
+} */
