@@ -41,7 +41,7 @@
   border-top: 3px solid black;
 }
 
-.row:nth-child(8) {
+.row:last-child {
   border-bottom: 3px solid black;
 }
 
@@ -50,6 +50,11 @@
   display: flex;
   padding: 0 20px;
   /* margin-top: 100px; */
+}
+
+.player-info p,
+.player-info h2 {
+  margin: 5px;
 }
 
 .wrapper {

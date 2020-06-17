@@ -23,6 +23,7 @@ class Gameboard extends Component {
         white: 2,
       },
       endGame: false,
+      pass: false,
     };
   }
 
@@ -131,7 +132,7 @@ class Gameboard extends Component {
       if (this.validateMove(index, value, key, counter, tempPlacement)) {
         //add indicies to array to be placed
         ogLocation = ogLocation.concat(tempPlacement);
-        this.setState({ validMove: true });
+        this.setState({ validMove: true, pass: false });
       }
       tempPlacement = [];
     }
@@ -235,6 +236,14 @@ class Gameboard extends Component {
     window.location.reload();
   };
 
+  handlePass = () => {
+    if (this.state.pass) {
+      this.endGame();
+    }
+    this.setState({ pass: true });
+    this.switchPlayer();
+  };
+
   render() {
     let { player, score, endGame } = this.state;
     let squares = this.state.squares.map((square, index) => {
@@ -266,6 +275,7 @@ class Gameboard extends Component {
         )}
         <div className="player-info">
           <h2>Current Player: {player}</h2>
+          <button onClick={this.handlePass}>Pass</button>
           <p>
             Black:{score.black} | White:{score.white}
           </p>
